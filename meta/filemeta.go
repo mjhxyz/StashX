@@ -17,6 +17,24 @@ func init() {
 	fileMetas = make(map[string]FileMeta)
 }
 
+// GetFileMetaListDB : 从mysql获取批量的文件元信息
+func GetFileMetaListDB(limit int) ([]FileMeta, error) {
+	tfiles, err := db.GetFileMetaList(limit)
+	if err != nil {
+		return nil, err
+	}
+	fmeta := make([]FileMeta, 0)
+	for _, tfile := range tfiles {
+		fmeta = append(fmeta, FileMeta{
+			FileSha1: tfile.FileHash,
+			FileName: tfile.FileName.String,
+			FileSize: tfile.FileSize.Int64,
+			Location: tfile.FileAddr.String,
+		})
+	}
+	return fmeta, nil
+}
+
 // GetFileMetaDB : 从mysql获取文件元信息
 func GetFileMetaDB(fileSha1 string) (FileMeta, error) {
 	tfile, err := db.GetFileMeta(fileSha1)
@@ -61,4 +79,8 @@ func GetFileMeta(fileSha1 string) FileMeta {
 
 func RemoveFileMeta(fileSha1 string) {
 	delete(fileMetas, fileSha1)
+}
+
+func RemoveFileMetaDB(fileSha1 string) bool {
+	return db.RemoveFileMeta(fileSha1)
 }

@@ -17,7 +17,8 @@ func FileDeleteHandler(writer http.ResponseWriter, request *http.Request) {
 	fileSha1 := request.Form.Get("filehash")
 	fMeta := meta.GetFileMeta(fileSha1)
 	os.Remove(fMeta.Location)
-	meta.RemoveFileMeta(fileSha1)
+	// meta.RemoveFileMeta(fileSha1)
+	meta.RemoveFileMetaDB(fileSha1)
 	writer.WriteHeader(http.StatusOK)
 }
 
@@ -82,7 +83,7 @@ func DownloadHandler(writer http.ResponseWriter, request *http.Request) {
 // ListFileMetaHandler : 获取文件元信息列表
 func ListFileMetaHandler(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
-	fileMetas := meta.GetFileMetaList()
+	fileMetas, err := meta.GetFileMetaListDB(10)
 	data, err := json.Marshal(fileMetas)
 	if err != nil {
 		fmt.Printf("序列化失败:%v\n", err)
