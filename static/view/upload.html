@@ -65,6 +65,7 @@
         upUrl = "http://" + upEntry + "/file/upload?" + queryParams();
       }
     }
+    upUrl = "http://192.168.60.100:8888/file/upload?" + queryParams();
     $.ajax({
       url: upUrl,
       type: 'POST',

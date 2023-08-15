@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"stashx/db"
 	"stashx/meta"
 	"stashx/util"
 	"time"
@@ -150,7 +151,7 @@ func HandleUpload(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// 计算 hash
+	// 计算 hash 值, 这个步骤可以抽取到微服务
 	newFile.Seek(0, 0)
 	fileMeta.FileSha1 = util.FileSha1(newFile)
 	fmt.Printf("文件hash:%s\n", fileMeta.FileSha1)
@@ -158,5 +159,17 @@ func HandleUpload(writer http.ResponseWriter, request *http.Request) {
 	// meta.UpdateFileMeta(fileMeta)
 	_ = meta.UpdateFileMetaDB(fileMeta)
 
-	writer.Write([]byte("上传成功!"))
+	// TODO: 更新用户文件表
+	request.ParseForm()
+	username := request.Form.Get("username")
+	suc := db.OnUserFileUploadFinished(
+		username, fileMeta.FileSha1,
+		fileMeta.FileName, fileMeta.FileSize,
+	)
+
+	if suc {
+		http.Redirect(writer, request, "/static/view/home.html", http.StatusFound)
+	} else {
+		writer.Write([]byte("Upload Failed."))
+	}
 }
