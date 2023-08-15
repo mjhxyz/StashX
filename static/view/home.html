@@ -72,7 +72,7 @@
   window.onload = function () {
     var username = document.getElementById('username');
     $.ajax({
-      url: "/user/info?" + queryParams(),
+      url: "/user/info?" + queryParams() + '&limit=15',
       type: "POST",
       error: function (err) {
         alert(JSON.stringify(err));
@@ -103,6 +103,9 @@
         alert(JSON.stringify(err));
       },
       success: function (body) {
+        if(typeof(body) == 'string') {
+          body = JSON.parse(body);
+        }
         if (!body) {
           return;
         }

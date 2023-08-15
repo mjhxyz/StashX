@@ -16,6 +16,7 @@ func main() {
 	mux.HandleFunc("/file/update", handler.MetaUpdateHandler)
 	mux.HandleFunc("/file/delete", handler.FileDeleteHandler)
 	mux.HandleFunc("/file/list", handler.ListFileMetaHandler)
+	mux.HandleFunc("/file/query", handler.FileQueryHandler)
 
 	mux.HandleFunc("/user/signup", handler.SignupHandler)
 	mux.HandleFunc("/user/signin", handler.SigninHandler)

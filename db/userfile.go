@@ -1,18 +1,19 @@
 package db
 
 import (
-	"database/sql"
+	"log"
 	mydb "stashx/db/mysql"
+	"time"
 )
 
 // UserFile: 用户文件表结构体
-type TableUserFile struct {
+type UserFile struct {
 	UserName    string
 	FileHash    string
-	FileName    sql.NullString
-	FileSize    sql.NullInt64
-	UploadAt    sql.NullTime
-	LastUpdated sql.NullTime
+	FileName    string
+	FileSize    int64
+	UploadAt    *time.Time
+	LastUpdated *time.Time
 }
 
 // OnUserFileUploadFinished: 更新用户文件表
@@ -36,4 +37,35 @@ func OnUserFileUploadFinished(username, filehash, filename string, filesize int6
 		return true
 	}
 	return false
+}
+
+// QueryUserFileMetas: 批量获取用户文件信息
+func QueryUserFileMetas(username string, limit int) ([]UserFile, error) {
+	stmt, err := mydb.DBConn().Prepare(
+		"select file_sha1,file_name,file_size,upload_at,last_update from stashx_user_file where user_name=? limit ?",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(username, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var userFiles []UserFile
+	for rows.Next() {
+		ufile := UserFile{}
+		err = rows.Scan(
+			&ufile.FileHash, &ufile.FileName, &ufile.FileSize, &ufile.UploadAt, &ufile.LastUpdated)
+		if err != nil {
+			log.Println(err.Error())
+			break
+		}
+		userFiles = append(userFiles, ufile)
+	}
+	log.Println("userFiles: ", userFiles)
+	return userFiles, nil
 }

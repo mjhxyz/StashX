@@ -9,6 +9,7 @@ import (
 	"stashx/db"
 	"stashx/meta"
 	"stashx/util"
+	"strconv"
 	"time"
 )
 
@@ -78,6 +79,29 @@ func DownloadHandler(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("Content-Type", "application/octect-stream")
 	writer.Header().Set("Content-Disposition", "attachment;filename=\""+fm.FileName+"\"")
+	writer.Write(data)
+}
+
+func FileQueryHandler(writer http.ResponseWriter, request *http.Request) {
+	request.ParseForm()
+	limitCnt := request.Form.Get("limit")
+	limit, _ := strconv.Atoi(limitCnt)
+	username := request.Form.Get("username")
+	userFiles, err := db.QueryUserFileMetas(username, limit)
+	if err != nil {
+		fmt.Printf("查询用户文件失败:%v\n", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data, err := json.Marshal(userFiles)
+	if err != nil {
+		fmt.Printf("序列化失败:%v\n", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
 	writer.Write(data)
 }
 

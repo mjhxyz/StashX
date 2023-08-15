@@ -10,7 +10,7 @@ import (
 var db *sql.DB
 
 func init() {
-	db, _ = sql.Open("mysql", "root:000000@tcp(192.168.60.100:3306)/stashx?charset=utf8")
+	db, _ = sql.Open("mysql", "root:000000@tcp(192.168.60.100:3306)/stashx?charset=utf8mb4&parseTime=true")
 	db.SetMaxOpenConns(1000)
 	err := db.Ping()
 	if err != nil {
