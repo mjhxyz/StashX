@@ -19,6 +19,31 @@ func init() {
 	}
 }
 
+func ParseRows(rows *sql.Rows) []map[string]interface{} {
+	columns, _ := rows.Columns()
+	scanArgs := make([]interface{}, len(columns))
+	values := make([]interface{}, len(columns))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+	var results []map[string]interface{}
+	for rows.Next() {
+		err := rows.Scan(scanArgs...)
+		if err != nil {
+			fmt.Printf("scan failed, err:%v\n", err)
+			panic(err)
+		}
+		row := make(map[string]interface{})
+		for i, col := range values {
+			if col != nil {
+				row[columns[i]] = col
+			}
+		}
+		results = append(results, row)
+	}
+	return results
+}
+
 // DBConn 返回数据库连接对象
 func DBConn() *sql.DB {
 	return db

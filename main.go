@@ -17,6 +17,9 @@ func main() {
 	mux.HandleFunc("/file/delete", handler.FileDeleteHandler)
 	mux.HandleFunc("/file/list", handler.ListFileMetaHandler)
 
+	mux.HandleFunc("/user/signup", handler.SignupHandler)
+	mux.HandleFunc("/user/signin", handler.SigninHandler)
+
 	fmt.Println("server start")
 	server := &http.Server{
 		Addr:    ":8888",
