@@ -19,6 +19,7 @@ func main() {
 
 	mux.HandleFunc("/user/signup", handler.SignupHandler)
 	mux.HandleFunc("/user/signin", handler.SigninHandler)
+	mux.HandleFunc("/user/info", handler.HTTPInterceptor(handler.UserInfoHandler))
 
 	fmt.Println("server start")
 	server := &http.Server{
