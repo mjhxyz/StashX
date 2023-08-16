@@ -22,15 +22,18 @@ func OnUserFileUploadFinished(username, filehash, filename string, filesize int6
 		"insert ignore into stashx_user_file (`user_name`,`file_sha1`,`file_name`,`file_size`) values (?,?,?,?)",
 	)
 	if err != nil {
+		log.Println(err.Error())
 		return false
 	}
 	defer stmt.Close()
 
 	ret, err := stmt.Exec(username, filehash, filename, filesize)
 	if err != nil {
+		log.Println(err.Error())
 		return false
 	}
 	if rf, err := ret.RowsAffected(); nil == err {
+		log.Println("没有影响的数量")
 		if rf <= 0 {
 			return false
 		}

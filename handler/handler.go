@@ -197,3 +197,44 @@ func HandleUpload(writer http.ResponseWriter, request *http.Request) {
 		writer.Write([]byte("Upload Failed."))
 	}
 }
+
+func TryFastUploadHandler(writer http.ResponseWriter, request *http.Request) {
+	// 1. 解析请求参数
+	request.ParseForm()
+	username := request.Form.Get("username")
+	filehash := request.Form.Get("filehash")
+	filename := request.Form.Get("filename")
+	filesize, _ := strconv.Atoi(request.Form.Get("filesize"))
+
+	// 2. 从文件表中查询相同hash的文件记录
+	fileMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil || fileMeta == nil {
+		fmt.Printf("查询文件失败:%v\n", err)
+		resp := util.RespMsg{
+			Code: -1,
+			Msg:  "秒传失败，请访问普通上传接口",
+		}
+		writer.Write(resp.JSONBytes())
+		return
+	}
+
+	// 3. 上传过则将文件信息写入用户文件表，返回成功
+	suc := db.OnUserFileUploadFinished(
+		username, filehash, filename, int64(filesize),
+	)
+	if suc {
+		resp := util.RespMsg{
+			Code: 0,
+			Msg:  "秒传成功",
+		}
+		writer.Write(resp.JSONBytes())
+		return
+	} else {
+		resp := util.RespMsg{
+			Code: -2,
+			Msg:  "秒传失败，请稍后重试",
+		}
+		writer.Write(resp.JSONBytes())
+		return
+	}
+}

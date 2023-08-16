@@ -17,6 +17,7 @@ func main() {
 	mux.HandleFunc("/file/delete", handler.FileDeleteHandler)
 	mux.HandleFunc("/file/list", handler.ListFileMetaHandler)
 	mux.HandleFunc("/file/query", handler.FileQueryHandler)
+	mux.HandleFunc("/file/fastupload", handler.HTTPInterceptor(handler.TryFastUploadHandler))
 
 	mux.HandleFunc("/user/signup", handler.SignupHandler)
 	mux.HandleFunc("/user/signin", handler.SigninHandler)
