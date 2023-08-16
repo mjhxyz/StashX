@@ -21,7 +21,7 @@ func FileDeleteHandler(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusOK)
 }
 
-// FileUploadHandler : 处理文件上传
+// MetaUpdateHandler : 更新文件元信息
 func MetaUpdateHandler(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 	opType := request.Form.Get("op")
@@ -96,7 +96,13 @@ func ListFileMetaHandler(writer http.ResponseWriter, request *http.Request) {
 func GetFileMetaHandler(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 	filehash := request.Form["filehash"][0]
-	fMeta := meta.GetFileMeta(filehash)
+	// fMeta := meta.GetFileMeta(filehash)
+	fMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		fmt.Printf("获取文件元信息失败:%v\n", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	data, err := json.Marshal(fMeta)
 	if err != nil {
@@ -148,7 +154,8 @@ func HandleUpload(writer http.ResponseWriter, request *http.Request) {
 	fileMeta.FileSha1 = util.FileSha1(newFile)
 	fmt.Printf("文件hash:%s\n", fileMeta.FileSha1)
 
-	meta.UpdateFileMeta(fileMeta)
+	// meta.UpdateFileMeta(fileMeta)
+	_ = meta.UpdateFileMetaDB(fileMeta)
 
 	writer.Write([]byte("上传成功!"))
 }
